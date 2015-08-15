@@ -11,7 +11,7 @@ int layerPinRed[4] = {2,3,4,5}; // y
 int layerPinBlue[4] = {9,10,11,12};
 
 int player = 1;
-int playerSignal[2] = {24,25};
+int playerSignal[2] = {24,25}; // player 1 & player 2
 
 /*
  D    cube
@@ -30,7 +30,7 @@ int playerSignal[2] = {24,25};
 int x;
 int y;
 int z;
-int flag;
+int decideFlag;
 
 int preX = -1;
 int preY = -1;
@@ -38,14 +38,15 @@ int preZ = -1;
 int firstSelect = 1;
 
 int overlapFlag = 0; // overlapしてたら1
-int overlapX = -1;
-int overlapY = -1;
-int overlapZ = -1;
 int overlapColor = 0;
+int preColor = -1;
+
+int lightSpan = 5000;
+int count = lightSpan; // ダイナミック点灯用
 
 void setup(){
   Serial.begin(9600);
-
+  /*
   // 通信開始処理
   while(Serial.available() == 0){
   }
@@ -59,7 +60,7 @@ void setup(){
     Serial.print('A');
   }
   Serial.println();
-
+  */
   // pinの設定
   for(int i=0; i<4; i++){
     pinMode(layerPinRed[i], OUTPUT);
@@ -88,7 +89,7 @@ void loop(){
       x = Serial.read();
       y = Serial.read();
       z = Serial.read();
-      flag = Serial.read();
+      decideFlag = Serial.read();
     }
   }
   else{
@@ -96,20 +97,26 @@ void loop(){
     return;
   }
 
-  if(x == 9 && y == 9 && z == 9 && flag == 9){
+  if(x == 9 && y == 9 && z == 9 && decideFlag == 9){
     resetAll();
     return;
   }
 
   setLED(x,y,z,-1);
-
-  overlap(x,y,z);
   dynamicLight();
 
   if(firstSelect == 0 && (x != preX || y != preY || z != preZ)){
+    if (overlapFlag == 1){
+      resetOverlap(preX, preY, preZ);
+    }
     turnOffTrack(preX, preY, preZ);
   }
-  if(flag == 1){
+
+  if(isRedOrBlue(x,y,z) == 1){
+    overlap(x,y,z);
+  }
+
+  if(decideFlag == 1){ // 決定された
     if(setLED(x,y,z,player) == 1){
       if(checkBingo() == 1){;
         winLight();
@@ -122,6 +129,7 @@ void loop(){
       preY = -1;
       preZ = -1;
       firstSelect = 1;
+      return;
     }
   }
 
@@ -141,21 +149,26 @@ int setLED(int x, int y, int z, int color){
   }
 }
 
-void overlap(int x, int y, int z){
-  if(overlapX != -1  && (overlapX != x || overlapY != y || overlapZ != z)){
-    overlapX = -1;
-    cube[y][x][z] = overlapColor;
+int isRedOrBlue(int x, int y, int z){
+  if(cube[y][x][z] == 1 || cube[y][x][z] == 2){
+    return 1;
+  }else{
+    return 0;
   }
+}
 
-  if(cube[y][x][z] != 0 && cube[y][x][z] != -1){
-    overlapX = x;
-    overlapY = y;
-    overlapZ = z;
-    overlapColor = cube[y][x][z];
-  }
-  else{
-    overlapX = -1;
-  }
+void overlap(int x, int y, int z){
+  overlapFlag = 1;
+  overlapColor = cube[y][x][z];
+  preColor = overlapColor;
+}
+
+void resetOverlap(int x, int y, int z){
+  overlapFlag = 0;
+  cube[y][x][z] = overlapColor;
+  overlapColor = 0;
+  preColor = -1;
+  count = lightSpan;
 }
 
 void turnOffTrack(int x, int y, int z){
@@ -164,11 +177,7 @@ void turnOffTrack(int x, int y, int z){
   }
 }
 
-
 // ダイナミック点灯
-int count = 1000;
-int preColor = -1;
-
 void dynamicLight(){
   for(int i=0; i<4; i++){
     for(int j=0; j<4; j++){
@@ -177,11 +186,12 @@ void dynamicLight(){
         if(cube[i][j][k] != 0){
           int color = cube[i][j][k];
 
-          if (overlapX != -1 ){ // 重なってたら処理
+          // 重なってたら処理
+          if (overlapFlag == 1 && i == y && j == x && k == z){
             if(count == 0){
               preColor = ( preColor == -1 ? overlapColor : -1 );
               cube[i][j][k] = preColor;
-              count = 1000;
+              count = lightSpan;
             }else{
               count--;
             }

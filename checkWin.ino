@@ -277,14 +277,14 @@ void winLight(){
         x = Serial.read();
         y = Serial.read();
         z = Serial.read();
-        flag = Serial.read();
+        decideFlag = Serial.read();
       }
     }
     else{
       dynamicLight();
     }
 
-    if(x == 9 && y == 9 && z == 9 && flag == 9){
+    if(x == 9 && y == 9 && z == 9 && decideFlag == 9){
       break;
     }
 
