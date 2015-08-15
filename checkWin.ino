@@ -90,7 +90,7 @@ int checkBingo(){
 // layer内の横
 int checkWidth(){
   for(int i=0; i<4; i++){
-    if(cube[y][i][z] != player){
+    if(cube[y][i][z] != nowPlayer){
       return 0;
     }
   }
@@ -105,7 +105,7 @@ int checkWidth(){
 // layer内の縦
 int checkLength(){
   for(int i=0; i<4; i++){
-    if(cube[y][x][i] != player){
+    if(cube[y][x][i] != nowPlayer){
       return  0;
     }
   }
@@ -121,7 +121,7 @@ int checkLength(){
 // 垂直方向
 int checkHight(){
   for(int i=0; i<4; i++){
-    if(cube[i][x][z] != player){
+    if(cube[i][x][z] != nowPlayer){
       return 0;
     }
   }
@@ -137,7 +137,7 @@ int checkHight(){
 int checkFixY_Slanting(){
   int i = 0;
   for(i=0; i<4; i++){
-    if(cube[y][i][i] != player){
+    if(cube[y][i][i] != nowPlayer){
       break;
     }
   }
@@ -149,7 +149,7 @@ int checkFixY_Slanting(){
   }
 
   for(i=0; i<4; i++){
-    if(cube[y][i][3-i] != player){
+    if(cube[y][i][3-i] != nowPlayer){
       return 0;
     }
   }
@@ -163,7 +163,7 @@ int checkFixY_Slanting(){
 int checkFixX_Slanting(){
   int i = 0;
   for(; i<4; i++){
-    if(cube[i][x][i] != player){
+    if(cube[i][x][i] != nowPlayer){
       break;
     }
   }
@@ -175,7 +175,7 @@ int checkFixX_Slanting(){
   }
 
   for(i=0; i<4; i++){
-    if(cube[i][x][3-i] != player){
+    if(cube[i][x][3-i] != nowPlayer){
       return 0;
     }
   }
@@ -189,7 +189,7 @@ int checkFixX_Slanting(){
 int checkFixZ_Slanting(){
   int i = 0;
   for(; i<4; i++){
-    if(cube[i][i][z] != player){
+    if(cube[i][i][z] != nowPlayer){
       break;
     }
   }
@@ -201,7 +201,7 @@ int checkFixZ_Slanting(){
   }
 
   for(i=0; i<4; i++){
-    if(cube[3-i][i][z] != player){
+    if(cube[3-i][i][z] != nowPlayer){
       return 0;
     }
   }
@@ -216,7 +216,7 @@ int checkNoFix_Slanting(){
   int i=0;
 
   for(; i<4; i++){
-    if(cube[i][i][i] != player) break;
+    if(cube[i][i][i] != nowPlayer) break;
   }
   if(i == 4){
     for(i=0; i<4; i++){
@@ -226,7 +226,7 @@ int checkNoFix_Slanting(){
   }
 
   for(i=3; i>=0; i--){
-    if(cube[i][3-i][3-i] != player) break;
+    if(cube[i][3-i][3-i] != nowPlayer) break;
   }
   if(i == -1){
     for(i=3; i>=0; i--){
@@ -236,7 +236,7 @@ int checkNoFix_Slanting(){
   }
 
   for(i=3; i>=0; i--){
-    if(cube[i][3-i][i] != player) break;
+    if(cube[i][3-i][i] != nowPlayer) break;
   }
   if(i == -1){
     for(i=3; i>=0; i--){
@@ -246,7 +246,7 @@ int checkNoFix_Slanting(){
   }
 
   for(i=0; i<4; i++){
-    if(cube[i][i][3-i] != player) break;
+    if(cube[i][i][3-i] != nowPlayer) break;
   }
   if(i == 4){
     for(i=0; i<4; i++){
@@ -268,7 +268,7 @@ void winLight(){
         }
     }
   }
-
+  music_win();
 
   while(true){
     if(Serial.available() > 4){

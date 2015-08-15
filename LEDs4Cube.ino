@@ -1,7 +1,12 @@
+#include <SD.h>
+#include <SPI.h>
+#include <arduino.h>
+#include <MusicPlayer.h>
+
 int cube[4][4][4] = {0}; // y x z
 
 int verticalPin[4][4] = {
-  {52,53,50,51},
+  {48,49,46,47},
   {44,45,42,43},
   {38,39,36,37},
   {30,31,28,29}
@@ -10,7 +15,12 @@ int verticalPin[4][4] = {
 int layerPinRed[4] = {2,3,4,5}; // y
 int layerPinBlue[4] = {9,10,11,12};
 
-int player = 1;
+/*
+int layerPinRed[4] = {21,20,19,18}; // y
+int layerPinBlue[4] = {17,16,15,14};
+*/
+
+int nowPlayer = 1;
 int playerSignal[2] = {24,25}; // player 1 & player 2
 
 /*
@@ -46,6 +56,10 @@ int count = lightSpan; // ダイナミック点灯用
 
 void setup(){
   Serial.begin(9600);
+  // mp3再生用
+  player.begin();  //will initialize the hardware and set default mode to be normal.
+  player.keyDisable();
+  
   /*
   // 通信開始処理
   while(Serial.available() == 0){
@@ -117,14 +131,14 @@ void loop(){
   }
 
   if(decideFlag == 1){ // 決定された
-    if(setLED(x,y,z,player) == 1){
+    if(setLED(x,y,z,nowPlayer) == 1){
       if(checkBingo() == 1){;
         winLight();
         resetAll();
       }
-      digitalWrite(playerSignal[player-1], LOW);
-      player = player == 1 ? 2 : 1;
-      digitalWrite(playerSignal[player-1], HIGH);
+      digitalWrite(playerSignal[nowPlayer-1], LOW);
+      nowPlayer = nowPlayer == 1 ? 2 : 1;
+      digitalWrite(playerSignal[nowPlayer-1], HIGH);
       preX = -1;
       preY = -1;
       preZ = -1;
@@ -142,6 +156,18 @@ void loop(){
 int setLED(int x, int y, int z, int color){
   if(cube[y][x][z] == 0 || cube[y][x][z] == -1){
     cube[y][x][z] = color;
+    
+    switch(color){
+    case -1:
+      //music_move();
+      break;
+    case 1:
+      music_decide1();
+      break;
+    case 2:
+      music_decide2();
+      break;
+    }
     return 1;
   }
   else{
@@ -251,7 +277,8 @@ void resetAll(){
   preY = -1;
   preZ = -1;
   firstSelect = 1;
-  player = 1;
+  nowPlayer = 1;
   digitalWrite(playerSignal[0], HIGH);
   digitalWrite(playerSignal[1], LOW);
+  music_reset();
 }
